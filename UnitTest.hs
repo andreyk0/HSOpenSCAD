@@ -235,6 +235,13 @@ tests = testGroup "Tests" [
        (var (fs 0.1) [sphere 2 $ fs 0.1])
     ],
 
+  testGroup "Modifiers" [
+    st "ignore" "%sphere(1.0);"
+       (ignore (sphere 1 def)),
+    st "debug" "#sphere(1.0);"
+       (debug (sphere 1 def))
+    ],
+
   testGroup "Errors" [
     testCase "Polygon Pointcount"
     . assertError "Polygon has fewer than 3 points." $

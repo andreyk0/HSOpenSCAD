@@ -128,6 +128,8 @@ module Graphics.OpenSCAD (
   var, fn, fs, fa, def,
   -- ** General convenience functions
   diam, draw, drawL, (#),
+  -- ** Modifier functions
+  ignore, debug,
   module Colours)
 
 where
@@ -261,6 +263,9 @@ data Model v = Shape Shape
              | Minkowski [Model v]
              | Hull [Model v]
              | Difference (Model v) (Model v)
+             -- OutputModifiers
+             | IgnoreSubTree (Model v)
+             | DebugSubTree (Model v)
              -- And oddball stuff control
              | Import FilePath
              | Var Facet [Model v]
@@ -487,6 +492,16 @@ minkowski = Minkowski
 hull :: Vector v => [Model v] -> Model v
 hull = Hull
 
+-- | Ignore this subtree for the normal rendering process and draw it in
+-- transparent gray (all transformations are still applied to the nodes in this
+-- tree).
+ignore :: Vector v => Model v -> Model v
+ignore = IgnoreSubTree
+
+-- | Use this subtree as usual in the rendering process but also draw it
+-- unmodified in transparent pink.
+debug :: Vector v => Model v -> Model v
+debug = DebugSubTree
 
 -- | 'render' does all the real work. It will walk the AST for a 'Model',
 -- returning an OpenSCAD program in a 'String'.
@@ -516,6 +531,8 @@ render (Transparent c s) =
 render (Var (Fa f) ss) = rList ("assign($fa=" ++ show f ++ ")") ss
 render (Var (Fs f) ss) = rList ("assign($fs=" ++ show f ++ ")") ss
 render (Var (Fn n) ss) = rList ("assign($fn=" ++ show n ++ ")") ss
+render (IgnoreSubTree m) = "%" ++ render m
+render (DebugSubTree m) = "#" ++ render m
 
 -- utility for rendering Shapes.
 rShape :: Shape -> String
