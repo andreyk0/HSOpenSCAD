@@ -121,7 +121,7 @@ module Graphics.OpenSCAD (
   -- ** Combinations
   union, intersection, difference, minkowski, hull,
   -- ** Transformations
-  scale, resize, rotate, translate, mirror, color, transparent, up,
+  scale, resize, rotate, translate, mirror, color, transparent, up, down,
   -- ** Rendering
   render, renderL,
   -- ** 'Facet's.
@@ -469,6 +469,10 @@ transparent = Transparent
 -- | A 'translate' that just goes up, since those seem to be common.
 up :: Double -> Model3d -> Model3d
 up f = translate (0, 0, f)
+
+-- | A 'translate' that just goes up, since those seem to be common.
+down :: Double -> Model3d -> Model3d
+down f = translate (0, 0, -f)
 
 
 -- Combinations
