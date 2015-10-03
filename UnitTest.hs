@@ -6,12 +6,24 @@ import Control.DeepSeq
 import Control.Exception
 import Test.Tasty
 import Test.Tasty.HUnit
-import Test.HUnit.Tools
 import Graphics.OpenSCAD
 import Data.Colour (withOpacity)
 import Data.List.NonEmpty (fromList)
 import Data.Monoid ((<>), Monoid,mconcat, mempty, mappend)
 
+
+
+assertRaises :: (Show a, Control.Exception.Exception e, Show e, Eq e) =>
+                String -> e -> IO a -> IO ()
+assertRaises msg selector action =
+    let thetest e = if e == selector then return ()
+                    else assertFailure $ msg ++ "\nReceived unexpected exception: "
+                             ++ (show e) ++ "\ninstead of exception: " ++ (show selector)
+        in do
+           r <- Control.Exception.try action
+           case r of
+                  Left e -> thetest e
+                  Right _ -> assertFailure $ msg ++ "\nReceived no exception, but was expecting exception: " ++ (show selector)
 
 
 assertError err code =
@@ -88,29 +100,29 @@ tests = testGroup "Tests" [
                                      [2,1,3]])
        ],
      testGroup "Linear-Extrusion" [
-       st "1" 
+       st "1"
           "linear_extrude(height=10.0,twist=0.0,scale=[1.0,1.0],slices=10,convexity=10)circle(1.0);"
           (linearExtrude 10 0 (1, 1) 10 10 def $ circle 1 def),
-       st "2" 
+       st "2"
           "linear_extrude(height=10.0,twist=100.0,scale=[1.0,1.0],slices=10,convexity=10)translate([2.0,0.0])circle(1.0);"
           (linearExtrude 10 100 (1, 1) 10 10 def $ translate (2, 0)
            $ circle 1 def),
-       st "3" 
+       st "3"
           "linear_extrude(height=10.0,twist=500.0,scale=[1.0,1.0],slices=10,convexity=10)translate([2.0,0.0])circle(1.0);"
           (linearExtrude 10 500 (1, 1) 10 10 def $ translate (2, 0)
            $ circle 1 def),
-       st "4" 
+       st "4"
           "linear_extrude(height=10.0,twist=360.0,scale=[1.0,1.0],slices=100,convexity=10)translate([2.0,0.0])circle(1.0);"
           (linearExtrude 10 360 (1, 1) 100 10 def $ translate (2, 0)
            $ circle 1 def),
-       st "5" 
+       st "5"
           "linear_extrude(height=10.0,twist=360.0,scale=[1.0,1.0],slices=100,convexity=10,$fn=100)translate([2.0,0.0])circle(1.0);"
           (linearExtrude 10 360 (1, 1) 100 10 (fn 100) $ translate (2, 0)
            $ circle 1 def),
-       st "6" 
+       st "6"
           "linear_extrude(height=10.0,twist=0.0,scale=[3.0,3.0],slices=100,convexity=10)translate([2.0,0.0])circle(1.0);"
           (linearExtrude 10 0 (3, 3) 100 10 def $ translate (2, 0) $ circle 1 def),
-       st "7" 
+       st "7"
           "linear_extrude(height=10.0,twist=0.0,scale=[1.0,5.0],slices=100,convexity=10,$fn=100)translate([2.0,0.0])circle(1.0);"
           (linearExtrude 10 0 (1, 5) 100 10 (fn 100) $ translate (2, 0)
            $ circle 1 def)
@@ -128,10 +140,10 @@ tests = testGroup "Tests" [
        st "Normal" "surface(file=\"test.dat\",convexity=5);" $
           surface "test.dat" False 5,
        st "Inverted" "surface(file=\"test.dat\",invert=true,convexity=5);" $
-          surface "test.dat" True 5	-- Requires  2014.QX
+          surface "test.dat" True 5 -- Requires  2014.QX
        ]
      ],
-     
+
   testGroup "2d-primitives" [
     testGroup "Squares" [
        st "rectangle" "square([2.0,3.0]);" $ rectangle 2 3,
@@ -195,7 +207,7 @@ tests = testGroup "Tests" [
       st "2" "mirror([0.0,1.0])square([2.0,1.0]);"
          (mirror (0, 1) $ rectangle 2 1)
          ],
-    
+
     st "multmatrix"
        "multmatrix([[1.0,0.0,0.0,10.0],[0.0,1.0,0.0,20.0],[0.0,0.0,1.0,30.0],[0.0,0.0,0.0,1.0]])cylinder(r=2.0,h=3.0);"
        (multMatrix ( (1, 0, 0, 10),
