@@ -135,6 +135,7 @@ where
 import Data.Colour (Colour, AlphaColour, alphaChannel, darken, over, black)
 import Data.Colour.Names as Colours
 import Data.Colour.SRGB (channelRed, channelBlue, channelGreen, toSRGB)
+import Data.Default
 import Data.List (elemIndices, nub, intercalate)
 import qualified Data.List.NonEmpty as NE
 import Data.Monoid ((<>), Monoid, mconcat, mempty, mappend)
@@ -208,6 +209,11 @@ type TransMatrix =
 -- appear as arguments to various constructors, as well as in the
 -- 'var' function to set them for the argument objects.
 data Facet = Fa Double | Fs Double | Fn Int | Def deriving Show
+
+instance Default Facet where
+  -- | 'def' is used where a 'Facet' is needed but we don't want to change
+  -- any of the values.
+  def = Def
 
 -- | A 'Join' controls how edges in a 'polygon' are joined by the
 -- 'offset' operation.
@@ -608,11 +614,6 @@ fs = Fs
 -- | 'fn' is used to set the @$fn@ variable in a 'Facet' or 'var'.
 fn :: Int -> Facet
 fn = Fn
-
--- | 'def' is used where a 'Facet' is needed but we don't want to change
--- any of the values.
-def :: Facet
-def = Def
 
 -- And one last convenience function.
 -- | Use 'diam' to turn a diameter into a radius for circles, spheres, etc.
