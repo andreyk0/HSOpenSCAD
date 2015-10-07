@@ -339,7 +339,7 @@ cube x = box x x x
 
 -- | Create a cylinder with @cylinder /radius height 'Facet'/@.
 cylinder :: Double -> Double -> Facet -> Model3d
-cylinder h r f = Solid $ Cylinder h r f
+cylinder r h f = Solid $ Cylinder r h f
 
 -- | Create an oblique cylinder with @cylinder /radius1 height radius2 'Facet'/@.
 obCylinder :: Double -> Double -> Double -> Facet -> Model Vector3d
