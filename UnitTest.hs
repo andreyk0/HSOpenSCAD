@@ -190,10 +190,10 @@ tests = testGroup "Tests" [
          (rotate (0, 180, 0) $ cube 2),
       st "3" "rotate([0.0,180.0,180.0])cube([2.0,2.0,2.0]);"
          (rotate (0, 180, 180) $ cube 2),
-      st "4" "rotate([180.0,0.0])square([2.0,1.0]);"
-         (rotate (180, 0) $ rectangle 2 1),
-      st "5" "rotate([0.0,180.0])square([2.0,1.0]);"
-         (rotate (0, 180) $ rectangle 2 1)
+      st "4" "rotate(90.0)square([2.0,1.0]);"
+         (rotate2d 90 $ rectangle 2 1),
+      st "5" "rotate(180.0)square([2.0,1.0]);"
+         (rotate2d 180 $ rectangle 2 1)
       ],
     testGroup "Mirrors" [
       st "1" "mirror([1.0,0.0,0.0])cube([2.0,2.0,2.0]);"

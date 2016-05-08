@@ -113,7 +113,7 @@ module Graphics.OpenSCAD (
   Sides(..),
   -- * Primitive creation
   -- ** 'Model2d's
-  rectangle, square, circle, polygon, unsafePolygon, projection, importFile,
+  rectangle, square, circle, polygon, unsafePolygon, projection, importFile, rotate2d,
   -- ** 'Model3d's
   sphere, box, cube, cylinder, obCylinder, polyhedron, unsafePolyhedron,
   multMatrix, linearExtrude, rotateExtrude, surface, solid,
@@ -134,15 +134,12 @@ module Graphics.OpenSCAD (
 
 where
 
-import Data.Colour (Colour, AlphaColour, alphaChannel, darken, over, black)
+import Data.Colour (Colour, AlphaColour, alphaChannel, darken, over)
 import Data.Colour.Names as Colours
 import Data.Colour.SRGB (channelRed, channelBlue, channelGreen, toSRGB)
 import Data.Default
 import Data.List (elemIndices, nub, intercalate)
-import qualified Data.List.NonEmpty as NE
-import Data.Monoid ((<>), Monoid, mconcat, mempty, mappend)
 import qualified Data.Set as Set
-import System.FilePath (FilePath)
 
 -- A vector in 2 or 3-space. They are used in transformations of
 -- 'Model's of their type.
@@ -253,6 +250,7 @@ data Model v = Shape Shape
              | Scale v (Model v)
              | Resize v (Model v)
              | Rotate v (Model v)
+             | RotateZ Double (Model v) -- to rotate 2D models
              | Translate v (Model v)
              | Mirror v (Model v)
              | Color (Colour Double) (Model v)
@@ -442,9 +440,13 @@ scale = Scale
 resize :: Vector v => v -> Model v -> Model v
 resize = Resize
 
--- | Rotate a 'Model' by different amounts around each of the three axis.
-rotate :: Vector v => v -> Model v -> Model v
+-- | Rotate a 3D 'Model' by different amounts around each of the three axis.
+rotate :: Vector3d -> Model3d -> Model3d
 rotate = Rotate
+
+-- | Rotate a 2D 'Model' by a given amount
+rotate2d :: Double -> Model2d -> Model2d
+rotate2d = RotateZ
 
 -- | Translate a 'Model' along a 'Vector'.
 translate :: Vector v => v -> Model v -> Model v
@@ -521,6 +523,7 @@ render (Scale v s) = rVecSolid "scale" v s
 render (Resize v s) = rVecSolid "resize" v s
 render (Translate v s) = rVecSolid "translate" v s
 render (Rotate v s) = "rotate(" ++ rVector v ++ ")" ++ render s
+render (RotateZ a s) = "rotate(" ++ show a ++ ")" ++ render s
 render (Mirror v s) = rVecSolid "mirror" v s
 render (Import f) = "import(\"" ++ f ++ "\");\n"
 render (Color c s) = let r = toSRGB c in
